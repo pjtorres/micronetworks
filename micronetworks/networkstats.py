@@ -82,14 +82,16 @@ def merge_corr_coef_pvalue_corr(df, pvalues_matrix, corr_coef=0.0, pval=0.05):
 
 
     df -- dataframe where rows are samples (indexed) and columns are features of interest. Make
-        sure you use the same dataframe used to generate your pvalues matrix.
+        sure you use the same dataframe used to generate your pvalues matrix. Make sure first column/index is sample names
     pvalues_matrix -- output from calculate_corrcoef_pvalues function
     corr_coef -- correlation coefficient you wish to use to filter your dataframe. Note:
                 Will take the absolute value of the correlation coefficient
     pval -- pvalue threshold you wish to use to filter your dataframe
     """
     # get correlation matrix of your DataFrame
-    corr_matrix = df.corr()
+    name = df.reset_index().columns[0]
+    
+    corr_matrix = df.reset_index().rename_axis(None, axis=1).rename_axis('index', axis=0).set_index(name).corr()
 
     ### Prepare the correlation df
     corr_matrix_stacked = corr_matrix.stack().reset_index()
