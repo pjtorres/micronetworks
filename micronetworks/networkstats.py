@@ -67,7 +67,9 @@ def calculate_corrcoef_pvalues(df,corr_stat):
                 pvalues[r][c] = corr_stat(tmp[r], tmp[c])[1]
             else:
                 pvalues[r][c]=1.0000
-    pvalues_matrix = pvalues[list(pvalues.reset_index()['index'])]
+    index = pvalues.reset_index().columns[0]
+    pvalues_matrix = pvalues[list(pvalues.reset_index()[index])]
+#     pvalues_matrix = pvalues[list(pvalues.reset_index()['index'])]
     return pvalues_matrix
 
 def merge_corr_coef_pvalue_corr(df, pvalues_matrix, corr_coef=0.0, pval=0.05):
