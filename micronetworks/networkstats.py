@@ -79,8 +79,6 @@ def merge_corr_coef_pvalue_corr(df, pvalues_matrix, corr_coef=0.0, pval=0.05):
     you are calculating the association with, followed by the pvalue, corrected pvalue and
     the correlation coefficient. You can control which variables you wish to see based
     on pvalue threshold and the correlation coefficient.
-
-
     df -- dataframe where rows are samples (indexed) and columns are features of interest. Make
         sure you use the same dataframe used to generate your pvalues matrix. Make sure first column/index is sample names
     pvalues_matrix -- output from calculate_corrcoef_pvalues function
@@ -100,7 +98,10 @@ def merge_corr_coef_pvalue_corr(df, pvalues_matrix, corr_coef=0.0, pval=0.05):
 
     ### Prepare the pvalues calcualted above
     pvalues_matrix_stacked = pvalues_matrix.stack().reset_index()
-    pvalues_matrix_stacked = pvalues_matrix_stacked.loc[ (pvalues_matrix_stacked['level_0'] != pvalues_matrix_stacked['level_1'])]
+    col1 = pvalues_matrix_stacked.columns[0]
+    col2 = pvalues_matrix_stacked.columns[1]
+    pvalues_matrix_stacked = pvalues_matrix_stacked.loc[ (pvalues_matrix_stacked[col1] != pvalues_matrix_stacked[col2])]
+#     pvalues_matrix_stacked = pvalues_matrix_stacked.loc[ (pvalues_matrix_stacked['level_0'] != pvalues_matrix_stacked['level_1'])]
     corr_matrix_stacked = corr_matrix_stacked.rename(columns={'value':'corr_coeff'})
 
     # ### multiple comparisons pvalue adjustment.
