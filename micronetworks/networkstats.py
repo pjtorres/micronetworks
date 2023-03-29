@@ -67,12 +67,13 @@ def calculate_corrcoef_pvalues(df,corr_stat):
                 pvalues[r][c] = corr_stat(tmp[r], tmp[c])[1]
             else:
                 pvalues[r][c]=1.0000
+    #pvalues_matrix = pvalues[list(pvalues.reset_index()['index'])]
     index = pvalues.reset_index().columns[0]
     pvalues_matrix = pvalues[list(pvalues.reset_index()[index])]
-#     pvalues_matrix = pvalues[list(pvalues.reset_index()['index'])]
     return pvalues_matrix
 
 def merge_corr_coef_pvalue_corr(df, pvalues_matrix, corr_coef=0.0, pval=0.05):
+
     """
     Will take your output from calculate_corrcoef_pvalues and the dataframe you used in
     generating it and return a dataframe where the first two columns are the variables
@@ -88,7 +89,6 @@ def merge_corr_coef_pvalue_corr(df, pvalues_matrix, corr_coef=0.0, pval=0.05):
     """
     # get correlation matrix of your DataFrame
     name = df.reset_index().columns[0]
-    
     corr_matrix = df.reset_index().rename_axis(None, axis=1).rename_axis('index', axis=0).set_index(name).corr()
 
     ### Prepare the correlation df
@@ -121,7 +121,8 @@ def merge_corr_coef_pvalue_corr(df, pvalues_matrix, corr_coef=0.0, pval=0.05):
     pvalues_matrix_stacked = pvalues_matrix_stacked.drop(columns='absolute')
     return pvalues_matrix_stacked
 
-def inverse_cov_glasso(df,filter,ncv=7,max_iter=777):
+
+def inverse_cov_glasso(df,filter,ncv=7,max_iterr=777):
     """
     Here we use the graphical  lasso method to find the sparse  inverse covariance matrix
     with cross-validation to automatically set the alpha parameters of the l1 penalty.
@@ -144,10 +145,13 @@ def inverse_cov_glasso(df,filter,ncv=7,max_iter=777):
                 iterations can sometimes improve the accuracy of the model, but it can also increase
                 the computation time.
     """
-    # tutorials used to built funciton:
+
+    edge_model = covariance.GraphicalLassoCV(cv=ncv,max_iter=max_iterr, n_jobs=-1)
+    name = df.reset_index().columns[0]
+    df = df.reset_index().rename_axis(None, axis=1).rename_axis('index', axis=0).set_index(name)
+    # tutorials used to built function:
     #https://scikit-learn.org/stable/auto_examples/covariance/plot_sparse_cov.html#sphx-glr-auto-examples-covariance-plot-sparse-cov-py
-    #https://towardsdatascience.com/machine-learning-in-action-in-finance-using-graphical-lasso-to-identify-trading-pairs-in-fa00d29c71a7
-    edge_model = covariance.GraphicalLassoCV(cv=ncv,max_iter=max_iterr)
+    #https://towardsdatascience.com/machine-learning-in-action-in-finance-using-graphical-lasso-to-identify-trading-pairs-in-fa00d29c71a7    edge_model = covariance.GraphicalLassoCV(cv=ncv,max_iter=max_iterr)
     df -= df.mean(axis=0)
     df /= df.std(axis=0)
 
@@ -169,8 +173,7 @@ def inverse_cov_glasso(df,filter,ncv=7,max_iter=777):
 
     #youre threshold here can dictate what happens below
     networkset=networkset.loc[ (abs(networkset['value']) > filter) &  (networkset['var1'] != networkset['var2']) ]
-    return networkset
-
+    return p, networkset
 
 
 def permutation_community_cluster(feature, G, perm, pct_present):
