@@ -146,7 +146,11 @@ def inverse_cov_glasso(df,filter,ncv=7,max_iterr=777):
                 the computation time.
     """
 
-    edge_model = covariance.GraphicalLassoCV(cv=ncv,max_iter=max_iterr, n_jobs=-1)
+    edge_model = covariance.GraphicalLassoCV(cv=ncv,max_iter=max_iterr, n_jobs=None)
+    
+    # can try the edge model below as well if you are not converging
+    
+#     edge_model = covariance.GraphicalLassoCV(cv=ncv,max_iter=max_iterr, n_jobs=None, verbose=True, alphas = list((10**np.linspace(3,-3,100)*.5)))
     name = df.reset_index().columns[0]
     df = df.reset_index().rename_axis(None, axis=1).rename_axis('index', axis=0).set_index(name)
     # tutorials used to built function:
