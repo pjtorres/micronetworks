@@ -67,12 +67,43 @@ def calculate_corrcoef_pvalues(df,corr_stat):
                 pvalues[r][c] = corr_stat(tmp[r], tmp[c])[1]
             else:
                 pvalues[r][c]=1.0000
+    #pvalues_matrix = pvalues[list(pvalues.reset_index()['index'])]
     index = pvalues.reset_index().columns[0]
     pvalues_matrix = pvalues[list(pvalues.reset_index()[index])]
-#     pvalues_matrix = pvalues[list(pvalues.reset_index()['index'])]
     return pvalues_matrix
 
+def bootstrap_calculate_corrcoef_pvalues(df, corr_stat, n_bootstrap=10):
+    """
+    Calculate Pearson (pearsonr) or spearman (spearmanr) correlation coefficient with associated p-value
+    for all features in a dataframe using bootstrap analysis.
+    df -- dataframe where rows are samples (indexed) and columns are features of interest.
+    corr_stat -- statistical test you wish to use in order to measure a statistical relationship
+                between two variables. Must be either pearsonr or spearmanr
+    n_bootstrap -- number of bootstrap iterations to use (default: 1000)
+    """
+    dfcols = pd.DataFrame(columns=df.columns)
+    pvalues = dfcols.transpose().join(dfcols, how='outer')
+    n_features = len(df.columns)
+    corr_coef_samples = np.zeros((n_bootstrap, n_features, n_features))
+    pvalue_samples = np.zeros((n_bootstrap, n_features, n_features))
+    for i in range(n_bootstrap):
+        # create bootstrap sample
+        bootstrap_df = df.sample(n=len(df)*0.75, replace=True)
+        for r_idx, r in enumerate(df.columns):
+            for c_idx, c in enumerate(df.columns):
+                if r != c:
+                    tmp = bootstrap_df[[r, c]].dropna()
+                    corr_coef_samples[i, r_idx, c_idx], pvalue_samples[i, r_idx, c_idx] = corr_stat(tmp[r], tmp[c])
+                else:
+                    corr_coef_samples[i, r_idx, c_idx] = 1.0
+                    pvalue_samples[i, r_idx, c_idx] = 0.0
+    avg_corr_coef = np.mean(corr_coef_samples, axis=0)
+    avg_pvalue = np.mean(pvalue_samples, axis=0)
+    pvalues_matrix = pd.DataFrame(avg_pvalue, index=df.columns, columns=df.columns)
+    return avg_corr_coef, pvalues_matrix
+
 def merge_corr_coef_pvalue_corr(df, pvalues_matrix, corr_coef=0.0, pval=0.05):
+
     """
     Will take your output from calculate_corrcoef_pvalues and the dataframe you used in
     generating it and return a dataframe where the first two columns are the variables
@@ -88,7 +119,6 @@ def merge_corr_coef_pvalue_corr(df, pvalues_matrix, corr_coef=0.0, pval=0.05):
     """
     # get correlation matrix of your DataFrame
     name = df.reset_index().columns[0]
-    
     corr_matrix = df.reset_index().rename_axis(None, axis=1).rename_axis('index', axis=0).set_index(name).corr()
 
     ### Prepare the correlation df
@@ -121,7 +151,8 @@ def merge_corr_coef_pvalue_corr(df, pvalues_matrix, corr_coef=0.0, pval=0.05):
     pvalues_matrix_stacked = pvalues_matrix_stacked.drop(columns='absolute')
     return pvalues_matrix_stacked
 
-def inverse_cov_glasso(df,filter,ncv=7,max_iter=777):
+
+def inverse_cov_glasso(df,filter,ncv=7,max_iterr=777, alphas=4):
     """
     Here we use the graphical  lasso method to find the sparse  inverse covariance matrix
     with cross-validation to automatically set the alpha parameters of the l1 penalty.
@@ -143,11 +174,20 @@ def inverse_cov_glasso(df,filter,ncv=7,max_iter=777):
                 return the best solution found so far. Note: Increasing the maximum number of
                 iterations can sometimes improve the accuracy of the model, but it can also increase
                 the computation time.
+    alphas -- is the regularization parameter controls the amount of shrinkage applied to the estimated precision matrix to prevent overfitting.
+              alphas refer to the range of regularization parameter values that are tested during cross-validation to select the optimal alpha value.
     """
-    # tutorials used to built funciton:
+
+    edge_model = covariance.GraphicalLassoCV(cv=ncv,max_iter=max_iterr, n_jobs=None)
+    
+    # can try the edge model below as well if you are not converging
+    
+#     edge_model = covariance.GraphicalLassoCV(cv=ncv,max_iter=max_iterr, n_jobs=None, verbose=True, alphas = list((10**np.linspace(3,-3,100)*.5)))
+    name = df.reset_index().columns[0]
+    df = df.reset_index().rename_axis(None, axis=1).rename_axis('index', axis=0).set_index(name)
+    # tutorials used to built function:
     #https://scikit-learn.org/stable/auto_examples/covariance/plot_sparse_cov.html#sphx-glr-auto-examples-covariance-plot-sparse-cov-py
-    #https://towardsdatascience.com/machine-learning-in-action-in-finance-using-graphical-lasso-to-identify-trading-pairs-in-fa00d29c71a7
-    edge_model = covariance.GraphicalLassoCV(cv=ncv,max_iter=max_iterr)
+    #https://towardsdatascience.com/machine-learning-in-action-in-finance-using-graphical-lasso-to-identify-trading-pairs-in-fa00d29c71a7    edge_model = covariance.GraphicalLassoCV(cv=ncv,max_iter=max_iterr)
     df -= df.mean(axis=0)
     df /= df.std(axis=0)
 
@@ -169,8 +209,7 @@ def inverse_cov_glasso(df,filter,ncv=7,max_iter=777):
 
     #youre threshold here can dictate what happens below
     networkset=networkset.loc[ (abs(networkset['value']) > filter) &  (networkset['var1'] != networkset['var2']) ]
-    return networkset
-
+    return p, networkset
 
 
 def permutation_community_cluster(feature, G, perm, pct_present):
