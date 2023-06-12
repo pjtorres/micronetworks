@@ -22,6 +22,15 @@ from sklearn.covariance import GraphicalLasso
 import networkx as nx
 import community as community_louvain
 
+def relativeabun(df):
+    """
+    calculate the relative abundance
+    df -- dataframe with columns as variables and
+    rows as observations.
+    """
+    rel = df.apply(lambda x: x/float(x.sum()), axis=1)
+    return rel
+
 def mr_clr(df):
     """
     Calculate the center log ratio (log (abs(x)/g(m)))
