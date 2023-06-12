@@ -46,6 +46,20 @@ def prevelance(df):
     prv=prv.sort_values(ascending=False)
     return prv
 
+def drop_feature_based_on_prevelance(df,prev_n):
+    """
+    Remove features based on precelance of feature. 
+    df --  dataframe with columns as variables and rows as observations.
+    prev_n -- is the percent prevalence you wish to filter. (i.e. 5 for 5 %)
+    """
+    print('Number of total samples: ', df.shape[0])
+    print('Number of total features in raw data: ', df.shape[1])
+    prev = pd.DataFrame(prevelance(df))
+    prevlist = list(prev[prev[0]<=prev_n].reset_index()['name'])
+    df_filtered = df.drop(prevlist, axis=1)
+    print('Number of total features after filtering out based on prevalence less than ',str(prev_n),':',df_filtered.shape[1])
+    return df_filtered
+
 def calculate_corrcoef_pvalues(df,corr_stat):
     """
     Calculate Pearson (pearsonr) or spearman (spearmanr) correlation coefficient with associated p-value
