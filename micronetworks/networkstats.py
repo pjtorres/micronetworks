@@ -1,7 +1,10 @@
 """
 Created on 12-01-2022
-@author: Pedro J. Torres
+@author: Pedro J. Torres 
+email: pjtorres88@gmail.com
+Updated: 06-13-2023
 """
+
 import pandas as pd
 import numpy as np
 import scipy
