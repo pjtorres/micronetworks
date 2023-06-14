@@ -9,11 +9,16 @@ import os
 
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-from matplotlib.pyplot import figure, text`
+from matplotlib.pyplot import figure, text
 
 import seaborn as sns
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
+from matplotlib.lines import Line2D
+import matplotlib as mpl
+from scipy.spatial.distance import pdist, squareform
+from scipy.cluster.hierarchy import linkage, dendrogram
+
 
 from scipy.stats import pearsonr
 from scipy.stats import spearmanr
@@ -350,3 +355,54 @@ def graph_pagerank(graph,maxiter=1000):
 
     pagerank = {k: v for k, v in sorted(nx.pagerank(graph,max_iter=maxiter).items(), key=lambda item: item[1], reverse=True)}
     return pagerank
+
+
+def clustermap(x_a, y_a, df_corre, methodd='ward'):
+    
+    """
+    Make a cluster map with features of interest in a given dataframe
+    df_corre -- correlation matrix for all the features
+    x_a -- list of features on x-axis
+    y_a = list of features on y-axis
+    methodd -- clsuterign method. default is ward
+    """
+  
+    df_for_clust = df_corre.loc[y_a,x_a]
+    #metricc = 'euclidean'
+#     methodd = 'ward'
+
+    row_corr = df_corre.loc[y_a,y_a]
+    row_dis_mat = 1 - row_corr
+    row_dis_vec = squareform(row_dis_mat)
+    row_linkagee = linkage(y=row_dis_vec, method = methodd)
+
+    column_corr = df_corre.loc[x_a,x_a]
+    column_dis_mat = 1 - column_corr
+    column_dis_vec = squareform(column_dis_mat)
+    column_linkagee = linkage(y=column_dis_vec, method = methodd)
+
+    # Create a custom colormap for the heatmap values
+    my_cmap=sns.diverging_palette(240, #Anchor hues for negative extents of the map. float in [0, 359]
+                                  10, #Anchor hues for positive extents of the map. float in [0, 359]
+                                  s = 75, # Anchor saturation for both extents of the map.float in [0, 100],
+                                  l = 50, # Anchor lightness for both extents of the map: float in [0, 100],
+                                  sep = 1, # Size of the intermediate region.
+                                  center = 'light', # Whether the center of the palette is light or dark
+                                  as_cmap = True # If True, return a matplotlib.colors.Colormap
+                                  )
+
+    clst_map=sns.clustermap(df_for_clust,
+                        cmap=my_cmap, 
+                        center=0,
+                        row_linkage = row_linkagee,
+                        col_linkage = column_linkagee,
+                        figsize=(23, 23),
+                        row_cluster=True,
+                        col_cluster=True,
+                        dendrogram_ratio=(.1, .2),
+                        cbar_pos=(0, 0.2, 0.03, 0.4),
+                        xticklabels = True,
+                        yticklabels = True)
+    
+    return clst_map
+
