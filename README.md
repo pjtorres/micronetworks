@@ -9,3 +9,7 @@ notes on how to treat your data and visualize networks.
 `pip install matplotlib==3.4.3`
 
 `pip install python-louvain==0.16`
+
+# installing
+Can install using the yml file and conda:
+`conda env create -f micronetwork-2023.1.yml`
