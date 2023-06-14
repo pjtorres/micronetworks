@@ -186,7 +186,8 @@ def merge_corr_coef_pvalue_corr(df, pvalues_matrix, corr_coef=0.0, pval=0.05):
     return pvalues_matrix_stacked
 
 def visualize_multiple_regression(x, y, df):
-        """
+    
+    """
     Perform multiple regression and output both the regresison results and a scatter plot showing the relationship between the 
     reponse and explanitory variables. 
     
@@ -194,7 +195,7 @@ def visualize_multiple_regression(x, y, df):
     y -- this is your explanatory variable e.g. 'indole-3-lactate'
     df -- you dataframe where rows are samples and columns are varaibles
 
-     """
+    """
     # Perform multiple regression
     X = sm.add_constant(df[x])
     model = sm.OLS(df[y], X)
