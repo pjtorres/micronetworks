@@ -9,8 +9,11 @@ import os
 
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-from matplotlib.pyplot import figure, text
+from matplotlib.pyplot import figure, text`
 
+import seaborn as sns
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
 
 from scipy.stats import pearsonr
 from scipy.stats import spearmanr
@@ -173,6 +176,45 @@ def merge_corr_coef_pvalue_corr(df, pvalues_matrix, corr_coef=0.0, pval=0.05):
     pvalues_matrix_stacked = pvalues_matrix_stacked.loc[ (pvalues_matrix_stacked['absolute'] > corr_coef) & (pvalues_matrix_stacked['var1'] != pvalues_matrix_stacked['var2']) & (pvalues_matrix_stacked['pvalue_corr']<= pval) ]
     pvalues_matrix_stacked = pvalues_matrix_stacked.drop(columns='absolute')
     return pvalues_matrix_stacked
+
+def visualize_multiple_regression(x, y, df):
+        """
+    Perform multiple regression and output both the regresison results and a scatter plot showing the relationship between the 
+    reponse and explanitory variables. 
+    
+    x -- this can be a list of exploratory variabels in your data frame (e.g. ['Bifidobacterium infants','Bifidobacterium breve']
+    y -- this is your explanatory variable e.g. 'indole-3-lactate'
+    df -- you dataframe where rows are samples and columns are varaibles
+
+     """
+    # Perform multiple regression
+    X = sm.add_constant(df[x])
+    model = sm.OLS(df[y], X)
+    results = model.fit()
+    
+    print(results.summary())
+    
+    coefficients = results.params[1:]  # Exclude the intercept
+    p_values = results.pvalues[1:]
+    
+    # Create scatter plot
+    num_features = len(x)
+    colors = sns.color_palette("deep", num_features)
+    labels = x
+    
+    for i, feature in enumerate(x):
+        sns.scatterplot(x=df[feature], y=df[y], color=colors[i], label=labels[i])
+        slope = coefficients[feature]
+        intercept = results.params['const']
+        sns.lineplot(x=df[feature], y=intercept + slope * df[feature], color=colors[i])
+        
+        text = f"{labels[i]}: Coefficient = {slope:.2f}, p-value = {p_values[feature]:.2f}"
+        plt.text(18, -2.5 - i * 0.5, text, ha='center', color=colors[i])
+    
+    # Display the plot
+    plt.figure(figsize=(8, 6))
+    plt.show()
+    return model
 
 
 def inverse_cov_glasso(df,filter,ncv=7,max_iterr=777, alphas=4):
