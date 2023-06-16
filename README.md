@@ -12,4 +12,5 @@ notes on how to treat your data and visualize networks.
 
 # installing
 Can install using the yml file and conda:
-`conda env create -f micronetwork-2023.1.yml`
+`conda env create -n micronetwork-2023.1 --file micronetwork-2023.1.yml`
+
