@@ -1,0 +1,15 @@
+Metadata-Version: 2.1
+Name: micronetworks
+Version: 0.1.0
+Summary: Microbiome/multiomics statistical analysis and network building tools.
+Home-page: https://github.com/persephonebiome/micronetworks
+Author: Pedro J. Torres
+Author-email: pjtorres88@gmail.com
+License: UNKNOWN
+Platform: UNKNOWN
+Classifier: Development Status :: 0.1 - Development
+Classifier: Programming Language :: Python :: 3.8.13
+Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
+
+UNKNOWN
+

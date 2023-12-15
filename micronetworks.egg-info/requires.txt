@@ -1,0 +1,9 @@
+numpy
+pandas
+matplotlib
+seaborn
+networkx
+scikit-bio
+community
+statsmodels
+scipy
