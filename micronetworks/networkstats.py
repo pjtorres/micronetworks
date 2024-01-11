@@ -75,7 +75,7 @@ def drop_feature_based_on_prevelance(df,prev_n):
     print('Number of total samples: ', df.shape[0])
     print('Number of total features in raw data: ', df.shape[1])
     prev = pd.DataFrame(prevelance(df))
-    prevlist = list(prev[prev[0]<=prev_n].reset_index()['name'])
+    prevlist = list(prev[prev[0]<=prev_n].reset_index().iloc[:, 0])
     df_filtered = df.drop(prevlist, axis=1)
     print('Number of total features after filtering out based on prevalence less than ',str(prev_n),':',df_filtered.shape[1])
     return df_filtered
