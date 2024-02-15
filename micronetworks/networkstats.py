@@ -252,7 +252,7 @@ def inverse_cov_glasso(df,filter,ncv=7,max_iterr=777, alphas=4):
               alphas refer to the range of regularization parameter values that are tested during cross-validation to select the optimal alpha value.
     """
 
-    edge_model = covariance.GraphicalLassoCV(cv=ncv,max_iter=max_iterr, n_jobs=None)
+    edge_model = covariance.GraphicalLassoCV(cv=ncv,max_iter=max_iterr, n_jobs=-1)
     
     # can try the edge model below as well if you are not converging
     
